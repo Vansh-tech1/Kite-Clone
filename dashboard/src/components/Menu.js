@@ -1,18 +1,60 @@
 import React, { useState } from "react";
-
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthContext";
 import { Link } from "react-router-dom";
+import axios from "axios";
+
 
 const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState(0);
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const { isLoggedIn, logout } = useAuth();
+  const [ ,forceUpdate] = useState({});
+
+  const navigate = useNavigate();
+
+  const loginStatus = localStorage.getItem("isLoggedIn");
+
+  useEffect(() => {
+    
+    forceUpdate();
+
+    // Force re-render 
+  }, [loginStatus]);
+  useEffect(()=>{
+    getUserInfo();
+  },[]);
+
+  const getUserInfo=async ()=>{
+    try{
+
+      const token=sessionStorage.getItem("authToken")
+      const response=await axios.get("http://localhost:3001/getUser",
+        {
+          headers:{
+            Authorization:`bearer ${token}`,
+          },
+        },
+      )
+    }catch(err){
+      console.log(err);
+    }
+  }
+
+  // const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   const handleMenuClick = (index) => {
     setSelectedMenu(index);
   };
-
-  const handleProfileClick = (index) => {
-    setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    logout();
+    navigate("/"); // Or use navigate("/") if using React Router
   };
+
+  // const handleProfileClick = (index) => {
+  //   setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  // };
 
   const menuClass = "menu";
   const activeMenuClass = "menu selected";
@@ -89,15 +131,34 @@ const Menu = () => {
             </Link>
           </li>
         </ul>
-        <Link
-          style={{ textDecoration: "none" }}
-          to="/login"
-          onClick={() => handleMenuClick(6)}
-        >
-          <p className={selectedMenu === 6 ? activeMenuClass : menuClass}>
-            Login
+
+        {!isLoggedIn ? (
+          <>
+            <Link
+              to="/login"
+              style={{ textDecoration: "none", marginTop: "7px" }}
+            >
+              <p>Login</p>
+            </Link>
+            <Link
+              to="/signup"
+              style={{
+                textDecoration: "none",
+                marginTop: "7px",
+                marginLeft: "1.5rem",
+              }}
+            >
+              <p>Signup</p>
+            </Link>
+          </>
+        ) : (
+          <p
+            onClick={handleLogout}
+            style={{ cursor: "pointer", marginTop: "7px", color: "red" }}
+          >
+            logout
           </p>
-        </Link>
+        )}
       </div>
     </div>
   );

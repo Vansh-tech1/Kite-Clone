@@ -15,10 +15,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Your password is required"],
   },
+  gender:{
+    type:String,
+    required:[true,"gender is required"],
+  },
   createdAt: {
     type: Date,
     default: new Date(),
   },
+  termsAgreed:{
+    type:Boolean,
+    required:true,
+  }
 });
 
 userSchema.pre("save", async function () {
