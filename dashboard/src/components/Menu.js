@@ -21,25 +21,7 @@ const Menu = () => {
 
     // Force re-render 
   }, [loginStatus]);
-  useEffect(()=>{
-    getUserInfo();
-  },[]);
 
-  const getUserInfo=async ()=>{
-    try{
-
-      const token=sessionStorage.getItem("authToken")
-      const response=await axios.get("http://localhost:3001/getUser",
-        {
-          headers:{
-            Authorization:`bearer ${token}`,
-          },
-        },
-      )
-    }catch(err){
-      console.log(err);
-    }
-  }
 
   // const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 

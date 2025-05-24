@@ -111,7 +111,7 @@ app.delete("/delete/:id", async (req, res) => {
 mongoose
   .connect(uri)
   .then(console.log("connected to db"))
-  .catch((error) => handleError(error));
+  .catch((error) => console.log(error));
 
 app.listen(PORT, () => {
   console.log("app is started");

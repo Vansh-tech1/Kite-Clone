@@ -1,4 +1,5 @@
 const User = require("../models/UserModel");
+const { getUserToken } = require("../services/authServices");
 const { createSecretToken } = require("../utils/SecretToken");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -15,18 +16,11 @@ module.exports.Signup = async (req, res, next) => {
     if (existingUser) {
       return res.json({ message: "User already exists" });
     }
-    const user = await User.create({
-      email,
-      password,
-      username,
-      gender,
-      createdAt,
-      termsAgreed,
-    });
-    const token = createSecretToken({
-      username: username,
-      email: email,
-      gender: gender,
+    const user = await User.create({ email, password, gender ,username, createdAt });
+    const token = createSecretToken(user._id);
+    res.cookie("token", token, {
+      withCredentials: true,
+      httpOnly: false,
     });
     res.cookie("token", token, {
       withCredentials: true,
@@ -57,15 +51,11 @@ module.exports.Login = async (req, res, next) => {
     if (!auth) {
       return res.json({ message: "Incorrect password or email" });
     }
-    const token = createSecretToken({
-      username: user.username,
-      email: user.email,
-      gender: user.gender,
-    });
-    res.cookie("token", token, {
-      withCredentials: true,
-      httpOnly: false,
-    });
+    const token = createSecretToken(user._id);
+     res.cookie("token", token, {
+       withCredentials: true,
+       httpOnly: false,
+     });
     res.status(201).json({
       message: "User logged in successfully",
       token: token,
@@ -78,13 +68,22 @@ module.exports.Login = async (req, res, next) => {
   }
 };
 
-module.exports.getUserfromToken = async (token) => {
-  try {
-    console.log(token.Authorization);
-    const decodedToken = await jwt.verify(token, JWT_Secret);
-
-    console.log(decodedToken);
-  } catch (err) {
-    console.log(err);
+module.exports.getUserfromToken=async(req,res)=>{
+  const token=req.headers.authorization?.split(' ')[1];
+  console.log(token);
+  if(!token){
+    return res.status(401).json({success:false,message:"Token Not Provided"});
   }
-};
+  try {
+    const response=await getUserToken(token);
+    console.log(response);
+    if (response.success) {
+      return res.status(200).json(response);
+    }
+    else {
+      return res.status(402).json(response);
+    }
+  } catch (error) {
+    return {success:false,message:"failed to retrieve data."}
+  }
+}
