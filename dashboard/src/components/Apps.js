@@ -9,7 +9,7 @@ const Apps = () => {
   }, []);
   const fetchUserDetails = async () => {
     try {
-      const token = sessionStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken");
       const response = await axios.get("http://localhost:3001/getUserdata", {
         headers: {
           Authorization: `Bearer ${token}`,

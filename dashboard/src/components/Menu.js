@@ -5,25 +5,26 @@ import { useAuth } from "./AuthContext";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-
 const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState(0);
   const { isLoggedIn, logout } = useAuth();
-  const [ ,forceUpdate] = useState({});
+  const [, forceUpdate] = useState({});
 
   const navigate = useNavigate();
+  console.log(`isloggedin is ${isLoggedIn}`);
 
   const loginStatus = localStorage.getItem("isLoggedIn");
 
   useEffect(() => {
-    
+    // console.log(isLoggedIn);
     forceUpdate();
+    fetchUserDetails();
+    // console.log("useeffect called");
 
-    // Force re-render 
+    // Force re-render
   }, [loginStatus]);
 
 
-  // const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   const handleMenuClick = (index) => {
     setSelectedMenu(index);
@@ -40,6 +41,33 @@ const Menu = () => {
 
   const menuClass = "menu";
   const activeMenuClass = "menu selected";
+
+  const [userData, setUserData] = useState("");
+  const [userName, setUsername] = useState("");
+  const fetchUserDetails = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get("http://localhost:3001/getUserdata", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success) {
+        setUserData(response.data.data);
+        setUsername(response.data.data.username);
+      } else {
+        console.log(response.data.message || "Failed to fetch user details");
+        console.log("issue");
+      }
+    } catch (err) {
+      console.error("error fetching user details: ", err);
+      console.log(err.response?.data?.message || "An error occured");
+    }
+  };
+
+  // console.log(loginStatus);
+  // console.log(isLoggedIn);
 
   return (
     <div className="menu-container">
@@ -114,7 +142,7 @@ const Menu = () => {
           </li>
         </ul>
 
-        {!isLoggedIn ? (
+        {!loginStatus ? (
           <>
             <Link
               to="/login"
@@ -136,9 +164,17 @@ const Menu = () => {
         ) : (
           <p
             onClick={handleLogout}
-            style={{ cursor: "pointer", marginTop: "7px", color: "red" }}
+            style={{
+              cursor: "pointer",
+              marginTop: "7px",
+              border: "2px solid ",
+              borderRadius: "1rem",
+              padding: "0.31rem",
+              width: "8rem",
+            }}
           >
-            logout
+            {userName} &nbsp;
+            <i class="fa-solid fa-right-from-bracket"></i>
           </p>
         )}
       </div>

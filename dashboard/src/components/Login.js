@@ -52,7 +52,8 @@ function Login() {
         login();
         const token = response.data.token;
         console.log(token);
-        sessionStorage.setItem("authToken", token);
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("keepLoggedIn",JSON.stringify(true));
         toast.success(data.message || "Login successful");
         navigate("/");
       } else {
